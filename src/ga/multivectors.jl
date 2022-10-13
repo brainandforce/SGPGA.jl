@@ -78,28 +78,42 @@ import Base.promote_rule
 
 # General promotion to multivectors
 function promote_rule(
-    ::Type{Multivector{Cl,T1}},
+    ::Type{<:Multivector{Cl,T1}},
     ::Type{<:AbstractMultivector{Cl,T2}}
 ) where {Cl,T1,T2}
     return Multivector{Cl,promote_type(T1,T2)}
 end
 
-function promote_rule(::Type{EvenMultivector{Cl,T1}}, ::Type{KVector{Cl,K,T2}}) where {Cl,K,T1,T2}
-    # Only promote to `MultiVector` if necessary
+function promote_rule(
+    ::Type{<:EvenMultivector{Cl,T1}},
+    ::Type{<:KVector{Cl,K,T2}}
+) where {Cl,K,T1,T2}
+    #= TODO:
+    This isn't type stable, but in principle, we want the type to be `EvenMultivector` if
+    the KVector grade is even.
     if iseven(K)
         return EvenMultivector{Cl,promote_type(T1,T2),2^(dimension(Cl) - 1)}
     else
         return Multivector{Cl,promote_type(T1,T2),2^dimension(Cl)}
     end
+    =#
+    return Multivector{Cl,promote_type(T1,T2),2^dimension(Cl)}
 end
 
-function promote_rule(::Type{KVector{Cl,K1,T1}}, ::Type{KVector{Cl,K2,T2}}) where {Cl,K1,K2,T1,T2}
-    # If both are even, promote to EvenMultivector, otherwise Multivector
+function Base.promote_rule(
+    ::Type{<:KVector{Cl,K1,T1}},
+    ::Type{<:KVector{Cl,K2,T2}}
+) where {Cl,K1,K2,T1,T2}
+    #= TODO:
+    This isn't type stable, but in principle, we want the type to be `EvenMultivector` if
+    the grades of both KVectors are even.
     if iseven(K1) && iseven(K2)
         return EvenMultivector{Cl,promote_type(T1,T2),2^(dimension(Cl) - 1)}
     else
         return Multivector{Cl,promote_type(T1,T2),2^dimension(Cl)}
     end
+    =#
+    return Multivector{Cl,promote_type(T1,T2),2^dimension(Cl)}
 end
 
 #---Type conversion rules-------------------------------------------------------------------------#
